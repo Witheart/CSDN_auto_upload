@@ -68,10 +68,14 @@ def process_markdown_for_csdn(md_file_path):
                         timeout=15000
                 ) as response_info:
 
-                    # 强行给网页中的隐藏文件输入框塞入本地图片，模拟人为点击上传
-                    # CSDN 编辑器里必然存在 <input type="file"> 用于接收图片
-                    file_input = page.locator('input[type="file"]').first
-                    file_input.set_input_files(abs_img_path)
+                    # 尝试通过 accept 属性精准寻找图片上传框
+                    img_input = page.locator('input[type="file"][accept*="image"]')
+
+                    if img_input.count() > 0:
+                        img_input.first.set_input_files(abs_img_path)
+                    else:
+                        # 如果 CSDN 没写 accept 属性，那么通常第二个 input 才是图片上传（第一个是导入 MD）
+                        page.locator('input[type="file"]').nth(1).set_input_files(abs_img_path)
 
                 # 5. 解析上传成功后返回的数据
                 response = response_info.value
