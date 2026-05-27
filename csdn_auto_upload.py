@@ -64,7 +64,7 @@ def process_markdown_for_csdn(md_file_path):
                     page.locator('.editor, .markdown-editor, .cke_textarea, body').first.click()
                     page.wait_for_timeout(500)
 
-                    # 注入粘贴事件
+                    # 注入图片粘贴事件
                     page.evaluate("""
                         ([b64Data, mimeType, fileName]) => {
                             const byteCharacters = atob(b64Data);
@@ -91,7 +91,7 @@ def process_markdown_for_csdn(md_file_path):
                     for _ in range(40):
                         page.wait_for_timeout(500)
                         page_text = page.evaluate("document.body.innerText")
-                        # 🚩 核心修复：在这里的正则加上了圆括号 () 的排除，防止把 markdown 语法的括号抓进去
+                        # 排除圆括号，防止抓取链接错误
                         urls = re.findall(r'(https://[^\s"\'\\()]+csdnimg\.cn[^\s"\'\\()]+)', page_text)
                         if urls:
                             csdn_url = urls[-1]
@@ -116,51 +116,56 @@ def process_markdown_for_csdn(md_file_path):
 
         try:
             # 1. 填写标题
-            # 宽泛地选中带有 title 相关 class 或 placeholder 的元素
             title_locator = page.locator(
                 'div.article-bar__title-display, input[placeholder*="标题"], .article-bar__title').first
-            title_locator.click()  # 这会触发 CSDN 将 div 变成 input 或者直接获取焦点
+            title_locator.click()
             page.wait_for_timeout(500)
 
-            # 全选清空默认的“【无标题】”，然后打字输入我们提取到的标题
             page.keyboard.press("Control+A")
             page.keyboard.press("Backspace")
             page.keyboard.insert_text(article_title)
             print("✅ 标题已自动填入")
 
             # 2. 填写正文
-            # 重新点击下方的编辑器主区域
             editor_area = page.locator('.editor, .markdown-editor, body').first
             editor_area.click()
             page.wait_for_timeout(500)
 
-            # 确保编辑器是空的，然后将带有外链 URL 的最终内容插入
             page.keyboard.press("Control+A")
             page.keyboard.press("Backspace")
 
-            # insert_text 是底层直接塞入字符，比模拟打字快得多且不会乱码
-            page.keyboard.insert_text(content)
-            print("✅ 文章内容已自动填入，排版完成！")
+            # 🚩 核心修复：弃用 insert_text，改用注入纯文本粘贴事件，完美保留所有换行符
+            page.evaluate("""
+                ([text]) => {
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.setData('text/plain', text);
+                    const event = new ClipboardEvent('paste', {
+                        clipboardData: dataTransfer,
+                        bubbles: true,
+                        cancelable: true
+                    });
+                    document.activeElement.dispatchEvent(event);
+                }
+            """, [content])
+
+            print("✅ 文章内容已通过模拟粘贴填入，完美保留排版！")
 
             # ==========================================
             # ====== 新增功能 3：主动点击保存草稿 ======
             # ==========================================
             print("⏳ 正在保存草稿...")
-            # 利用 class 和 文本 双重特征精准定位保存按钮
             save_btn = page.locator('.btn-save, button:has-text("保存草稿")').first
             save_btn.click()
 
-            # 点击后必须等待几秒，让浏览器把数据通过网络发给 CSDN 服务器
-            # CSDN 界面右上角通常会弹出一个“保存成功”的绿色提示
             page.wait_for_timeout(3000)
             print("✅ 草稿保存成功！")
 
         except Exception as e:
             print(f"❌ 填入正文或保存草稿时发生错误: {e}")
 
-        # 给浏览器一点缓冲时间让你看清效果
-        page.wait_for_timeout(15000)
-        browser.close()
+        # # 给浏览器一点缓冲时间让你看清效果
+        # page.wait_for_timeout(3000)
+        # browser.close()
 
     # 依然在本地保留一份 _csdn.md 作为备份，防范网页意外崩溃
     out_file = md_file_path.replace('.md', '_csdn.md')
@@ -172,5 +177,6 @@ def process_markdown_for_csdn(md_file_path):
 
 # ================= 运行测试 =================
 if __name__ == "__main__":
+    # 将这里替换为你本地想要处理的 md 文件路径
     target_md_file = r"F:\0000_CODE\CSDN_auto_upload\3588 Ubuntu TeamViewer 安装及使用\3588 Ubuntu Teamviewer 安装及使用.md"
     process_markdown_for_csdn(target_md_file)
