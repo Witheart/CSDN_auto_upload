@@ -33,8 +33,28 @@ def process_markdown_for_csdn(md_file_path):
 
         page = browser.new_page()
         page.goto("https://editor.csdn.net/md/")
-        print("等待 3 秒 (首次运行请确保已扫码登录并看到编辑器界面)...")
-        page.wait_for_timeout(3000)
+
+        # =======================================================
+        # ====== 新增功能 4：智能判断登录状态，动态等待 ======
+        # =======================================================
+        print("🔍 正在检查登录状态...")
+        try:
+            # 尝试在 3 秒内寻找编辑器特有元素（说明已经处于登录状态）
+            page.wait_for_selector('.editor, .markdown-editor, div.article-bar__title-display', timeout=3000)
+            print("✅ 已处于登录状态，直接开始处理...")
+            page.wait_for_timeout(3000)  # 缓冲一下，确保页面前端组件完全挂载
+        except:
+            print("⚠️ 未检测到编辑器界面，可能需要登录。")
+            print("👉 请在弹出的浏览器窗口中扫码或登录 (程序将静默等待，最长 60 秒)...")
+            try:
+                # 给足 60 秒人工登录时间，一旦扫码成功并加载出编辑器，立刻放行
+                page.wait_for_selector('.editor, .markdown-editor, div.article-bar__title-display', timeout=60000)
+                print("✅ 登录成功，开始执行后续流程！")
+                page.wait_for_timeout(2000)  # 登录跳转后多缓冲一下
+            except Exception:
+                print("❌ 超过 60 秒未检测到登录成功状态，脚本终止。")
+                browser.close()
+                return
 
         # ====== 处理图片上传 (核心保持不变) ======
         if images:
@@ -134,7 +154,7 @@ def process_markdown_for_csdn(md_file_path):
             page.keyboard.press("Control+A")
             page.keyboard.press("Backspace")
 
-            # 🚩 核心修复：弃用 insert_text，改用注入纯文本粘贴事件，完美保留所有换行符
+            # 弃用 insert_text，改用注入纯文本粘贴事件，完美保留所有换行符
             page.evaluate("""
                 ([text]) => {
                     const dataTransfer = new DataTransfer();
