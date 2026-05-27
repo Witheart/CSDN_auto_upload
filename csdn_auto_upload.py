@@ -39,16 +39,26 @@ def process_markdown_for_csdn(md_file_path):
         page.wait_for_timeout(15000)
 
         # 4. 遍历并上传图片
+        md_dir = os.path.dirname(os.path.abspath(md_file_path))
+
+        # 4. 遍历并上传图片
         for img_path in images:
-            # 处理相对路径和绝对路径问题
-            # 如果你的 md 文件和图片不在同级目录，这里可能需要拼接完整路径
-            abs_img_path = os.path.abspath(img_path)
+            # ====== 修改：智能处理绝对路径和相对路径 ======
+            # 如果已经是绝对路径（例如 F:\... 或 /...），则保持不变
+            if os.path.isabs(img_path):
+                abs_img_path = img_path
+            else:
+                # 如果是相对路径，将其与 .md 文件所在的目录进行拼接
+                abs_img_path = os.path.join(md_dir, img_path)
+
+            # 规范化路径分隔符（自动处理 \ 和 / 的跨平台问题）
+            abs_img_path = os.path.normpath(abs_img_path)
 
             if not os.path.exists(abs_img_path):
                 print(f"⚠️ 找不到图片文件: {abs_img_path}，跳过该图。")
                 continue
 
-            print(f"正在上传: {img_path}")
+            print(f"✅ 成功定位图片，准备上传: {abs_img_path}")
 
             try:
                 # 核心逻辑：监听 CSDN 上传图片的网络响应
