@@ -141,8 +141,21 @@ def process_markdown_for_csdn(md_file_path):
             page.keyboard.insert_text(content)
             print("✅ 文章内容已自动填入，排版完成！")
 
+            # ==========================================
+            # ====== 新增功能 3：主动点击保存草稿 ======
+            # ==========================================
+            print("⏳ 正在保存草稿...")
+            # 利用 class 和 文本 双重特征精准定位保存按钮
+            save_btn = page.locator('.btn-save, button:has-text("保存草稿")').first
+            save_btn.click()
+
+            # 点击后必须等待几秒，让浏览器把数据通过网络发给 CSDN 服务器
+            # CSDN 界面右上角通常会弹出一个“保存成功”的绿色提示
+            page.wait_for_timeout(3000)
+            print("✅ 草稿保存成功！")
+
         except Exception as e:
-            print(f"❌ 填入标题或正文时发生错误: {e}")
+            print(f"❌ 填入正文或保存草稿时发生错误: {e}")
 
         # 给浏览器一点缓冲时间让你看清效果
         page.wait_for_timeout(3000)
