@@ -91,7 +91,8 @@ def process_markdown_for_csdn(md_file_path):
                     for _ in range(40):
                         page.wait_for_timeout(500)
                         page_text = page.evaluate("document.body.innerText")
-                        urls = re.findall(r'(https://[^\s"\'\\]+csdnimg\.cn[^\s"\'\\]+)', page_text)
+                        # 🚩 核心修复：在这里的正则加上了圆括号 () 的排除，防止把 markdown 语法的括号抓进去
+                        urls = re.findall(r'(https://[^\s"\'\\()]+csdnimg\.cn[^\s"\'\\()]+)', page_text)
                         if urls:
                             csdn_url = urls[-1]
                             break
