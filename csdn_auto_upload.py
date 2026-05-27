@@ -183,9 +183,9 @@ def process_markdown_for_csdn(md_file_path):
         except Exception as e:
             print(f"❌ 填入正文或保存草稿时发生错误: {e}")
 
-        # # 给浏览器一点缓冲时间让你看清效果
-        # page.wait_for_timeout(3000)
-        # browser.close()
+        # 给浏览器一点缓冲时间让你看清效果
+        page.wait_for_timeout(3000)
+        browser.close()
 
     # 依然在本地保留一份 _csdn.md 作为备份，防范网页意外崩溃
     out_file = md_file_path.replace('.md', '_csdn.md')
