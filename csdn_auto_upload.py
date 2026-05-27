@@ -33,8 +33,8 @@ def process_markdown_for_csdn(md_file_path):
 
         page = browser.new_page()
         page.goto("https://editor.csdn.net/md/")
-        print("等待 15 秒 (首次运行请确保已扫码登录并看到编辑器界面)...")
-        page.wait_for_timeout(15000)
+        print("等待 3 秒 (首次运行请确保已扫码登录并看到编辑器界面)...")
+        page.wait_for_timeout(3000)
 
         # ====== 处理图片上传 (核心保持不变) ======
         if images:
@@ -159,7 +159,7 @@ def process_markdown_for_csdn(md_file_path):
             print(f"❌ 填入正文或保存草稿时发生错误: {e}")
 
         # 给浏览器一点缓冲时间让你看清效果
-        page.wait_for_timeout(3000)
+        page.wait_for_timeout(15000)
         browser.close()
 
     # 依然在本地保留一份 _csdn.md 作为备份，防范网页意外崩溃
