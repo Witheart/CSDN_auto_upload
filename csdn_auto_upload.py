@@ -233,10 +233,7 @@ def process_markdown_for_csdn(md_file_path):
         page.wait_for_timeout(3000)
         browser.close()
 
-    out_file = md_file_path.replace('.md', '_csdn.md')
-    with open(out_file, 'w', encoding='utf-8') as f:
-        f.write(content)
-
+    # 🚩 删除了在本地保存 _csdn.md 文件的代码
     print(f"\n🎉 全部自动化流程执行完毕！请前往浏览器查看草稿箱或直接发布。")
 
 
