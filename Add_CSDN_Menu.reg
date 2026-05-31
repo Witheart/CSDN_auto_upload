@@ -1,0 +1,10 @@
+Windows Registry Editor Version 5.00
+
+; 为 .md 文件关联的系统类型添加菜单
+[HKEY_CURRENT_USER\Software\Classes\SystemFileAssociations\.md\shell\UploadToCSDN]
+@="🚀 上传到 CSDN 草稿箱"
+"Icon"="\"F:\\0000_TOOL\\CSDN_auto_upload\\.venv\\Scripts\\python.exe\""
+
+; 配置点击菜单后执行的命令
+[HKEY_CURRENT_USER\Software\Classes\SystemFileAssociations\.md\shell\UploadToCSDN\command]
+@="\"F:\\0000_TOOL\\CSDN_auto_upload\\upload_csdn.bat\" \"%1\""

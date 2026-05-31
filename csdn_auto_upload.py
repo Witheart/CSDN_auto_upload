@@ -3,6 +3,7 @@ import os
 import base64
 import mimetypes
 import datetime
+import sys
 from playwright.sync_api import sync_playwright
 
 # ==========================================
@@ -241,7 +242,12 @@ def process_markdown_for_csdn(md_file_path):
 
 # ================= 运行测试 =================
 if __name__ == "__main__":
-    # 现在你可以在任何路径下执行这个脚本了！
-    # 比如: python F:\tools\csdn_auto_upload.py "F:\notes\06. 其他工具使用技巧\CH7511B配置工具使用补充\CH7511B配置工具使用补充.md"
-    target_md_file = r"F:\notes\06. 其他工具使用技巧\CH7511B配置工具使用补充\CH7511B配置工具使用补充.md"
-    process_markdown_for_csdn(target_md_file)
+    # 判断是否接收到了右键传进来的文件路径
+    if len(sys.argv) > 1:
+        target_md_file = sys.argv[1]
+        print(f"🚀 接收到目标文件: {target_md_file}")
+        process_markdown_for_csdn(target_md_file)
+    else:
+        print("❌ 错误：请提供一个 Markdown 文件路径！")
+        print("💡 提示：你可以直接把 .md 文件拖拽到这个脚本上，或者通过右键菜单使用。")
+        input("按任意键退出...")
