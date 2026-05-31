@@ -35,9 +35,9 @@ def mark_as_uploaded(md_file_path):
     rel_path = os.path.relpath(md_file_path, notes_root)
     rel_path = rel_path.replace('\\', '/') # 转换为 Linux 风格，兼容 bash 脚本
     
-    # 3. 确保文件存在
+    # 3. 确保文件存在（强制使用 Linux 换行符 \n）
     if not os.path.exists(upload_log_path):
-        with open(upload_log_path, 'w', encoding='utf-8') as f:
+        with open(upload_log_path, 'w', encoding='utf-8', newline='\n') as f:
             pass 
             
     # 4. 检查是否已经标记过
@@ -50,9 +50,9 @@ def mark_as_uploaded(md_file_path):
             print(f"📌 记录提示: 文件之前已在 {date_marked} 标记过上传，跳过重复写入。")
             return
             
-    # 5. 追加新记录
+    # 5. 追加新记录（强制使用 Linux 换行符 \n）
     today = datetime.datetime.now().strftime("%Y-%m-%d")
-    with open(upload_log_path, 'a', encoding='utf-8') as f:
+    with open(upload_log_path, 'a', encoding='utf-8', newline='\n') as f:
         f.write(f"{rel_path}:{today}\n")
     print(f"📝 记账成功: 已将 {rel_path} 写入根目录的 .upload_status (日期: {today})")
 
@@ -242,6 +242,6 @@ def process_markdown_for_csdn(md_file_path):
 # ================= 运行测试 =================
 if __name__ == "__main__":
     # 现在你可以在任何路径下执行这个脚本了！
-    # 比如: python F:\tools\csdn_auto_upload.py F:\0000_CODE\CSDN_auto_upload\笔记分类\文章.md
+    # 比如: python F:\tools\csdn_auto_upload.py "F:\notes\06. 其他工具使用技巧\CH7511B配置工具使用补充\CH7511B配置工具使用补充.md"
     target_md_file = r"F:\notes\06. 其他工具使用技巧\CH7511B配置工具使用补充\CH7511B配置工具使用补充.md"
     process_markdown_for_csdn(target_md_file)
