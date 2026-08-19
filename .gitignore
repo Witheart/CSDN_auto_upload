@@ -1,3 +1,4 @@
 /.idea/
 /.venv/
 /csdn_browser_data/
+__pycache__/
